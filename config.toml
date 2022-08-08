@@ -1,0 +1,37 @@
+baseURL = "https://lyoshur.github.io/story"
+languageCode = "zh-CN"
+title = "羡鱼先生"
+copyright = "不那么好过的日子里，要学会每天给自己找一个开心的理由，哪怕只是，阳光很暖，电量很满。"
+theme = "npq-hugo"
+themesdir = "themes"
+pygmentsUseClasses=true
+
+[params]
+  author = "羡鱼先生"
+  description = "散了散了。有什么事，睡醒再说。"
+  keywords = "故事角"
+  useAvatar = true
+  microBlogSection = "posts"
+  displayMicroBlog = false
+  displayRecent = true
+  recentMax = 4
+  mail = "lyoshur@foxmail.com"
+  phone = "*** **** ****"
+  formspreeID = "yourformspreeID"
+
+[menu]
+  [[menu.main]]
+    name = "主页"
+    pre = "<i class=\"fas fa-home fa-sm\"></i>"
+    url = "/"
+    weight = -9 
+  [[menu.main]]
+    name = "文摘"
+    pre = "<i class=\"fas fa-keyboard fa-ms\"></i>"
+    url = "/blog/"
+    weight = -8
+  [[menu.main]]
+    name = "标签"
+    pre = "<i class=\"fas fa-tags fa-ms\"></i>"
+    url = "/tags"
+    weight = -7

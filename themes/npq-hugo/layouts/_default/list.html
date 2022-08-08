@@ -1,0 +1,30 @@
+{{ define "main" }}
+    <div class="section">
+        <dev class="section-title">
+            {{if eq .Section "tags"}}标签{{end}}
+            {{if eq .Section "blog"}}文章{{end}}
+        </dev>
+        {{ range $index, $element := .Paginator.Pages }}
+            {{if ne .Title "index"}}
+                <div class="list-item">
+                    <a class="entry-title" href="{{ .URL }}">{{ .Title }}</a>
+                    {{$page := .}}
+                    {{with .Description}}
+                    <p>{{.}}</p>
+                    {{end}}
+                    <div class="meta">
+                        {{with .Date}}
+                        <i class="far fa-calendar-alt"></i> {{.Format "2006/01/02 15:04:05"}}
+                        {{end}}
+                        <br>
+                        {{with .Params.tags}}
+                        <i class="fas fa-tags"></i>
+                        Tags: {{ delimit . ", " }}
+                        {{end}}
+                    </div>
+                </div>
+            {{end}}
+        {{end}}
+    </div>
+    {{ partial "pagination.html" $ }}
+{{end}}
