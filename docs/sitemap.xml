@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/</loc>
+    <lastmod>2023-03-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/blog/</loc>
+    <lastmod>2023-03-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/tags/</loc>
+    <lastmod>2023-03-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/blog/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E8%B7%A8%E5%9F%9F%E8%AF%B7%E6%B1%82/</loc>
+    <lastmod>2023-03-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/tags/%E8%B7%A8%E5%9F%9F/</loc>
+    <lastmod>2023-03-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>https://lyoshur.github.io/story/contact/</loc>
+  </url>
+  
+</urlset>

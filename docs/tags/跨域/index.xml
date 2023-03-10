@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>跨域 on 羡鱼先生</title>
+    <link>https://lyoshur.github.io/story/tags/%E8%B7%A8%E5%9F%9F/</link>
+    <description>Recent content in 跨域 on 羡鱼先生</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <copyright>不那么好过的日子里，要学会每天给自己找一个开心的理由，哪怕只是，阳光很暖，电量很满。</copyright>
+    <lastBuildDate>Fri, 10 Mar 2023 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://lyoshur.github.io/story/tags/%E8%B7%A8%E5%9F%9F/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>同源策略和跨域请求</title>
+      <link>https://lyoshur.github.io/story/blog/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E8%B7%A8%E5%9F%9F%E8%AF%B7%E6%B1%82/</link>
+      <pubDate>Fri, 10 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://lyoshur.github.io/story/blog/%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5%E5%92%8C%E8%B7%A8%E5%9F%9F%E8%AF%B7%E6%B1%82/</guid>
+      <description>同源策略和跨域请求 1 什么是同源和跨域 首先来看一个示例
+http://127.0.0.1:8080/abchttps://localhost:8081/bcd每一个地址由三部分构成：协议（http或https）、域（域名、IP地址、host）、端口号。
+这三部分都相同的两个地址，则称为这两个地址同源。否之则称为跨域。
+这里注意，端口后的地址 /abc 和 /bcd 是不会影响是否同源的。
+2 什么时候会进行同源策略验证 前端在通过ajax或axios等接口，请求后端地址时，其实是将请求的参数交给浏览器。由浏览器发起对后端接口的请求。而浏览器会对前端页面的地址、后端的接口地址，两个地址间进行同源策略验证。如果验证通过，则可以正常访问，如果验证不通过则会报错跨域请求。
+既然知道了是浏览器进行同源策略验证，这里就能解释几个问题：
+1.当我们通过一个独立的node程序、C++程序或Java程序等请求后端地址时，由于不会走浏览器。所以不会受同源策略影响。这也可以解释为什么没有正确配置跨域的接口，在postman请求时正常访问，而通过前端调用就会报错跨域。
+2.某些浏览器可以通过设置，关闭掉同源策略验证，这个时候我们的前端也可以正常请求跨域的接口。但是不推荐这样做，首先是从业务上，不能要求每个用户都进行浏览器设置，其次直接关掉同源策略验证，会导致CSRF（跨域请求伪造）的风险急剧增加，影响安全性。
+浏览器要进行同源策略，其实也是出于安全性的原因，但是过分的安全，会导致易用性的下降。所以浏览器通常会允许一些常见的请求进行跨域访问，比如HTML页面中的等标签，这些标签链接css、js等文件时，其实是不受同源策略影响的。这也是jsonp的核心思想。jsonp的知识会在稍后介绍。
+3 同源策略的现象 最直观的现象就是，在进行接口调用时，控制台会出现类似CORS、Access-Control-Allow-Origin等报错信息，我们进一步梳理跨域请求的步骤，首先浏览器会根据前端的地址、后端接口的地址进行同源策略验证，当被验证为跨域时，浏览器会预先向对应的接口发起一个OPTIONS请求，检查对应的后端是否允许跨域请求。后端在响应OPTIONS请求时，会在响应头中配置 Access-Control-Allow-Origin，来告诉浏览器允许哪些跨域请求。
+常用的配置有
+Access-Control-Allow-Origin: *星号表示，允许任意地址的跨域请求。也可以通过
+Access-Control-Allow-Origin: www.baidu.com来指定允许某一个域进行访问。
+4 如何解决跨域请求问题 我们已经知道了几条规则：
+4.1 同源策略是浏览器通过OPTIONS请求，验证的后端响应头中的跨域配置。 所以这里可以延伸出两种跨域请求的解决办法
+4.1.1 让后端对OPTIONS请求进行处理 让后端对OPTIONS请求进行处理,响应回Access-Control-Allow-Origin: *。浏览器在收到OPTIONS请求的响应后，就会允许当前的跨域请求。
+例如@Cross注解或者在拦截器中设置响应头。
+4.1.2 前端设置代理 通常使用node的前端项目，可以采用代理（proxy）的方式，来避免跨域，这里其实是绕开了跨域而不是解决问题。
+因为前端通过浏览器访问的是代理服务，通常代理服务和前端服务是同源的。所以不会触发浏览器的同源策略。而代理服务是通过编程语言直接发送请求到后端服务，没有经过浏览器。所以也不会触发同源策略。
+这里列出未使用代理的请求路径：
+前端代码 -&amp;gt; 浏览器JS引擎 -&amp;gt; 后端接口
+当使用代理士
+前端代码 -&amp;gt; 浏览器JS引擎 -&amp;gt; 代理服务 -&amp;gt; 后端接口
+4.1.3 后端设置反向代理 在通常的情况下，除了单体应用，很少直接在后端服务设置Access-Control-Allow-Origin响应头，一是对代码有侵入性，二是设置为星号允许全部跨域请求不安全，而设置为特定的域名时，又会增加额外的配置项。所以通常是在网关服务或反向代理服务器（例如nginx）中配置。
+这时前端的访问链路为
+前端代码 -&amp;gt; 浏览器JS引擎 -&amp;gt; 反向代理服务 -&amp;gt; 后端接口</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="散了散了。有什么事，睡醒再说。">
+    <meta name="Author" content="羡鱼先生">
+    <meta name="keywords" content="故事角">
+    <link rel="stylesheet" href=https://lyoshur.github.io/story/css/syntax.css>
+    <link rel="stylesheet" href=https://lyoshur.github.io/story/css/style.css>
+    <script src="https://kit.fontawesome.com/1b7478c139.js" crossorigin="anonymous"></script>
+    <title>羡鱼先生</title>
+  </head><body><aside id="sidenav">
+    <header>
+    
+        <a href=https://lyoshur.github.io/story><img src="https://lyoshur.github.io/story/avatar.jpg" alt="avatar"></a>
+        
+    
+
+    <a id="branding" href=https://lyoshur.github.io/story>
+        
+            羡鱼先生
+        
+    </a>
+    </header>
+
+    <nav>
+        
+            		
+            <a href="/story/"
+                
+            >
+                <i class="fas fa-home fa-sm"></i>
+                <span>主页</span>
+            </a>
+        
+            		
+            <a href="/story/blog/"
+                
+            >
+                <i class="fas fa-keyboard fa-ms"></i>
+                <span>文摘</span>
+            </a>
+        
+            		
+            <a href="/story/tags"
+                
+            >
+                <i class="fas fa-tags fa-ms"></i>
+                <span>标签</span>
+            </a>
+        
+    </nav>
+</aside>
+<main id="main">
+            <a href="javascript:void(0)" id="closebtn" onclick="navToggle()"><i class="fas fa-bars fa-lg"></i></a>
+            <div class="content">
+    
+    <h1 id="title">同源策略和跨域请求</h1>
+    
+      
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-什么是同源和跨域">1 什么是同源和跨域</a></li>
+    <li><a href="#2-什么时候会进行同源策略验证">2 什么时候会进行同源策略验证</a></li>
+    <li><a href="#3-同源策略的现象">3 同源策略的现象</a></li>
+    <li><a href="#4-如何解决跨域请求问题">4 如何解决跨域请求问题</a>
+      <ul>
+        <li><a href="#41-同源策略是浏览器通过options请求验证的后端响应头中的跨域配置">4.1 同源策略是浏览器通过OPTIONS请求，验证的后端响应头中的跨域配置。</a></li>
+        <li><a href="#42-利用html标签jsonp">4.2 利用HTML标签（jsonp）</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-一些特殊的跨域">5 一些特殊的跨域</a>
+      <ul>
+        <li><a href="#51-非法的请求头">5.1 非法的请求头</a></li>
+        <li><a href="#52-网关后的服务出错">5.2 网关后的服务出错</a></li>
+        <li><a href="#53-双重跨域">5.3 双重跨域</a></li>
+      </ul>
+    </li>
+    <li><a href="#6-总结">6 总结</a></li>
+  </ul>
+</nav>
+    <h1 id="同源策略和跨域请求">同源策略和跨域请求</h1>
+<h2 id="1-什么是同源和跨域">1 什么是同源和跨域</h2>
+<p>首先来看一个示例</p>
+<pre><code>http://127.0.0.1:8080/abc
+https://localhost:8081/bcd
+</code></pre><p>每一个地址由三部分构成：协议（http或https）、域（域名、IP地址、host）、端口号。</p>
+<p>这三部分都相同的两个地址，则称为这两个地址同源。否之则称为跨域。</p>
+<p>这里注意，端口后的地址 /abc 和 /bcd 是不会影响是否同源的。</p>
+<h2 id="2-什么时候会进行同源策略验证">2 什么时候会进行同源策略验证</h2>
+<p>前端在通过ajax或axios等接口，请求后端地址时，其实是将请求的参数交给浏览器。由浏览器发起对后端接口的请求。而浏览器会对前端页面的地址、后端的接口地址，两个地址间进行同源策略验证。如果验证通过，则可以正常访问，如果验证不通过则会报错跨域请求。</p>
+<p>既然知道了是浏览器进行同源策略验证，这里就能解释几个问题：</p>
+<p>1.当我们通过一个独立的node程序、C++程序或Java程序等请求后端地址时，由于不会走浏览器。所以不会受同源策略影响。这也可以解释为什么没有正确配置跨域的接口，在postman请求时正常访问，而通过前端调用就会报错跨域。</p>
+<p>2.某些浏览器可以通过设置，关闭掉同源策略验证，这个时候我们的前端也可以正常请求跨域的接口。但是不推荐这样做，首先是从业务上，不能要求每个用户都进行浏览器设置，其次直接关掉同源策略验证，会导致CSRF（跨域请求伪造）的风险急剧增加，影响安全性。</p>
+<p>浏览器要进行同源策略，其实也是出于安全性的原因，但是过分的安全，会导致易用性的下降。所以浏览器通常会允许一些常见的请求进行跨域访问，比如HTML页面中的<!-- raw HTML omitted --> <!-- raw HTML omitted -->等标签，这些标签链接css、js等文件时，其实是不受同源策略影响的。这也是jsonp的核心思想。jsonp的知识会在稍后介绍。</p>
+<h2 id="3-同源策略的现象">3 同源策略的现象</h2>
+<p>最直观的现象就是，在进行接口调用时，控制台会出现类似CORS、Access-Control-Allow-Origin等报错信息，我们进一步梳理跨域请求的步骤，首先浏览器会根据前端的地址、后端接口的地址进行同源策略验证，当被验证为跨域时，浏览器会预先向对应的接口发起一个OPTIONS请求，检查对应的后端是否允许跨域请求。后端在响应OPTIONS请求时，会在响应头中配置 Access-Control-Allow-Origin，来告诉浏览器允许哪些跨域请求。</p>
+<p>常用的配置有</p>
+<pre><code>Access-Control-Allow-Origin: *
+</code></pre><p>星号表示，允许任意地址的跨域请求。也可以通过</p>
+<pre><code>Access-Control-Allow-Origin: www.baidu.com
+</code></pre><p>来指定允许某一个域进行访问。</p>
+<h2 id="4-如何解决跨域请求问题">4 如何解决跨域请求问题</h2>
+<p>我们已经知道了几条规则：</p>
+<h3 id="41-同源策略是浏览器通过options请求验证的后端响应头中的跨域配置">4.1 同源策略是浏览器通过OPTIONS请求，验证的后端响应头中的跨域配置。</h3>
+<p>所以这里可以延伸出两种跨域请求的解决办法</p>
+<h4 id="411-让后端对options请求进行处理">4.1.1 让后端对OPTIONS请求进行处理</h4>
+<p>让后端对OPTIONS请求进行处理,响应回Access-Control-Allow-Origin: *。浏览器在收到OPTIONS请求的响应后，就会允许当前的跨域请求。</p>
+<p>例如@Cross注解或者在拦截器中设置响应头。</p>
+<h4 id="412-前端设置代理">4.1.2 前端设置代理</h4>
+<p>通常使用node的前端项目，可以采用代理（proxy）的方式，来避免跨域，这里其实是绕开了跨域而不是解决问题。</p>
+<p>因为前端通过浏览器访问的是代理服务，通常代理服务和前端服务是同源的。所以不会触发浏览器的同源策略。而代理服务是通过编程语言直接发送请求到后端服务，没有经过浏览器。所以也不会触发同源策略。</p>
+<p>这里列出未使用代理的请求路径：</p>
+<p>前端代码 -&gt; 浏览器JS引擎 -&gt; 后端接口</p>
+<p>当使用代理士</p>
+<p>前端代码 -&gt; 浏览器JS引擎 -&gt; 代理服务 -&gt; 后端接口</p>
+<h4 id="413-后端设置反向代理">4.1.3 后端设置反向代理</h4>
+<p>在通常的情况下，除了单体应用，很少直接在后端服务设置Access-Control-Allow-Origin响应头，一是对代码有侵入性，二是设置为星号允许全部跨域请求不安全，而设置为特定的域名时，又会增加额外的配置项。所以通常是在网关服务或反向代理服务器（例如nginx）中配置。</p>
+<p>这时前端的访问链路为</p>
+<p>前端代码 -&gt; 浏览器JS引擎 -&gt; 反向代理服务 -&gt; 后端接口</p>
+<p>看似调用链和前端设置代理是一致的，但主要区别是，当前端配置代理时，浏览器JS引擎和代理服务间，是同源的。所以不会受同源策略的影响。</p>
+<p>而后端配置反向代理时，前端和反向代理服务器不同源，代理服务器返回Access-Control-Allow-Origin,这时前端能正常通过同源策略。不会被拦截。</p>
+<h3 id="42-利用html标签jsonp">4.2 利用HTML标签（jsonp）</h3>
+<p>通过前面，我们已知浏览器通常会允许一些常见的请求进行跨域访问，比如HTML页面中的<!-- raw HTML omitted --> <!-- raw HTML omitted -->等标签，这些标签链接css、js等文件时，其实是不受同源策略影响的。这也是jsonp的核心思想。</p>
+<p>所以利用这条通路，我们可以实现另一种形式的接口访问</p>
+<p>当我们需要请求后端接口时，我们伪造一个<!-- raw HTML omitted -->标签，链接到后端的接口地址。这个时候浏览器会认为我们在请求js脚本，而忽略同源策略。缺点也显而易见，后端返回值不再是单纯的数据，而是需要伪装成js脚本。其次这种请求方式由于是伪造的script标签。所以只能支持get请求。</p>
+<p>由于这种请求方式已经渐渐消失了，所以在这里不做详细解释。详情自行百度 jsonp</p>
+<h2 id="5-一些特殊的跨域">5 一些特殊的跨域</h2>
+<p>上面解释的情况是通常意义上标准的跨域请求的概念，还有一些特殊的情况下，会出现类似跨域的错误。</p>
+<h3 id="51-非法的请求头">5.1 非法的请求头</h3>
+<p>在前端调用接口时，有时会出现CORS、Access-Control-Allow-Heades等字样，虽然看起来是出现了跨域请求，但是实际上是设置了一些后端不允许的请求头参数。具体的信息也在OPTIONS请求中，OPTIONS的响应中会包含Access-Control-Allow-Heades列出服务器允许的请求头。当前端设置了后端允许的请求头时，就会出现这种现象，解决办法类似Access-Control-Allow-Origin,让后端设置OPTIONS响应，允许对应的请求头即可。</p>
+<h3 id="52-网关后的服务出错">5.2 网关后的服务出错</h3>
+<p>这也是一种常见的错误，表现形式类似于跨域，但是导致这种问题的原因，在于在网关后的服务或因为不在线，或因为报错。导致网关响应了错误。浏览器误以为是跨域请求。这种情况可以直接使用Postman等工具检查后端服务是否可用。</p>
+<h3 id="53-双重跨域">5.3 双重跨域</h3>
+<p>这其实是一种特殊情况，假设前端调用某后端服务网关，网关消费到某个具体的后端服务。当网关和后端服务都配置了跨域请求头时，就会出现这种问题。原因是OPTIONS的响应头其实是一种特殊的数组，而不是字典。当重复设置响应头时，会让浏览器无法正确识别跨域配置。导致爆出跨域的问题。</p>
+<h2 id="6-总结">6 总结</h2>
+<p>这里我们详细解释了同源和跨域的区别以及如果解决跨域请求的几种思路。在排查跨域问题时，通常的做法是，首先使用工具（Postman等）确认后端服务是否正常，当后端服务正常时，检查浏览器发出的OPTIONS请求是否得到正常响应，检查Access-Control-Allow-Origin、Access-Control-Allow-Heades等参数是否符合预期。再结合几种特殊情况，对跨域请求进行诊断。</p>
+
+    
+    <div class="nav-next-prev">
+        <div class="nav-prev">
+            
+                <a class="grayed-out" href="javascript:void()"><i class="fas fa-chevron-left"></i></a>
+            
+        </div>
+        <a class="nav-top" href="#">top</i></a>
+        <div class="nav-next">
+            
+                <a class="grayed-out" href="javascript:void()"><i class="fas fa-chevron-right"></i></a>
+            
+        </div>
+    </div>
+    
+
+            </div><footer>
+<div class="footer-content">
+
+  <div class="contact-info">
+      
+          <div class="footer-mail">
+          <i class="far fa-envelope"></i> <a href="mailto:lyoshur@foxmail.com">&nbsplyoshur@foxmail.com</a> </div>
+      
+  </div>
+
+
+<p class="copyright meta">不那么好过的日子里，要学会每天给自己找一个开心的理由，哪怕只是，阳光很暖，电量很满。</p>
+
+</div>
+</footer></main>
+    </body>
+    <script src=https://lyoshur.github.io/story/js/navbutton.js></script>
+</html>
